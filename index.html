@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz sur les Expressions Françaises</title>
+  <style>
+    /* Style de base */
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+    }
+
+    /* Container principal */
+    .container {
+      text-align: center;
+      padding: 20px;
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 400px;
+    }
+
+    /* Zone d'affichage de l'expression */
+    #title {
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    #expression {
+      font-size: 1.5em;
+      font-weight: bold;
+      margin-bottom: 20px;
+      opacity: 0;
+      animation: fadeIn 0.5s forwards;
+    }
+
+    /* Style des boutons de réponse */
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 1em;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .btn:hover {
+      background-color: #45a049;
+    }
+
+    /* Animation de réponse */
+    .correct {
+      animation: correctAnswer 0.5s forwards;
+    }
+
+    .wrong {
+      animation: wrongAnswer 0.5s forwards;
+    }
+
+    /* Animation simple pour fade-in */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Animation de bonne réponse */
+    @keyframes correctAnswer {
+      from { background-color: #4CAF50; }
+      to { background-color: #32CD32; }
+    }
+
+    /* Animation de mauvaise réponse */
+    @keyframes wrongAnswer {
+      from { background-color: #4CAF50; }
+      to { background-color: #FF6347; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Boutons pour choisir Origine ou Explication -->
+    <div>
+      <button onclick="selectMode('origine')" class="btn">Origine</button>
+      <button onclick="selectMode('explication')" class="btn">Explication</button>
+    </div>
+    
+    <!-- Zone d'affichage de la question -->
+    <div id="title"></div>
+    <div id="expression"></div>
+    
+    <!-- Boutons de réponses -->
+    <button class="btn" onclick="checkAnswer(0)" id="answer0"></button>
+    <button class="btn" onclick="checkAnswer(1)" id="answer1"></button>
+    <button class="btn" onclick="checkAnswer(2)" id="answer2"></button>
+    <button class="btn" onclick="checkAnswer(3)" id="answer3"></button>
+  </div>
+
+  <script>
+    // Les données des expressions avec de vraies fausses origines
+    const expressions = [
+  {
+    text: "Poser un lapin",
+    origine: "Ne pas honorer un rendez-vous",
+    explication: "Manquer à un rendez-vous",
+    fake_origine: ["Jeter quelque chose à quelqu'un", "Offrir un cadeau", "Accorder une faveur sans raison"],
+    fake_explication: ["Aller à un rendez-vous", "Être gentil", "Faire un don"]
+  },
+  {
+    text: "Être dans le pétrin",
+    origine: "Expression des boulangers en difficulté",
+    explication: "Être dans une situation compliquée",
+    fake_origine: ["Une expression de marins", "Un terme ancien pour une bataille", "Une expression de maçons"],
+    fake_explication: ["Être en colère", "S'enrichir rapidement", "Avoir trop de chance"]
+  },
+  {
+    text: "Raconter des salades",
+    origine: "Expression du XIXe siècle pour mentir",
+    explication: "Mentir ou raconter des histoires",
+    fake_origine: ["Expression du Moyen Âge sur les légumes", "Ancienne coutume de fermiers", "Proverbe culinaire"],
+    fake_explication: ["Dire la vérité", "Rester silencieux", "Demander de l'aide"]
+  },
+  {
+    text: "Casser les pieds",
+    origine: "Provient de l'agacement au pied militaire",
+    explication: "Énerver ou agacer quelqu'un",
+    fake_origine: ["Proverbe sur les douleurs", "Expression des enseignants", "Expression sportive"],
+    fake_explication: ["Rendre heureux", "Encourager quelqu'un", "Faire des compliments"]
+  },
+  {
+    text: "Avoir un chat dans la gorge",
+    origine: "De l'expression anglaise 'frog in the throat'",
+    explication: "Avoir la voix enrouée",
+    fake_origine: ["Expression culinaire", "Ancien terme médical", "Proverbe animalier"],
+    fake_explication: ["Avoir la gorge sèche", "Être triste", "Avoir peur"]
+  },
+  {
+    text: "Avoir la main verte",
+    origine: "Origine agricole sur la croissance des plantes",
+    explication: "Être doué pour le jardinage",
+    fake_origine: ["Avoir une peau verte", "Porter des gants", "Travailler dans une ferme"],
+    fake_explication: ["Être végétarien", "Aimer les animaux", "Conduire une voiture verte"]
+  },
+  {
+    text: "Donner sa langue au chat",
+    origine: "Les chats au Moyen Âge incarnaient le mystère",
+    explication: "Renoncer à deviner",
+    fake_origine: ["Avoir un secret", "Avoir un animal domestique", "Parler avec difficulté"],
+    fake_explication: ["Gagner un pari", "Réussir facilement", "Persévérer"]
+  },
+  {
+    text: "Être lessivé",
+    origine: "Du vocabulaire militaire pour fatigue extrême",
+    explication: "Être épuisé",
+    fake_origine: ["Faire la lessive", "Utiliser de l'eau", "Nettoyer"],
+    fake_explication: ["Être énergique", "Avoir trop mangé", "Travailler dur"]
+  },
+  {
+    text: "Se serrer la ceinture",
+    origine: "Rationnement de la nourriture en temps de guerre",
+    explication: "Limiter ses dépenses",
+    fake_origine: ["Changer de pantalon", "Être obèse", "Perdre son pantalon"],
+    fake_explication: ["Dépenser plus", "Se nourrir davantage", "Se donner des récompenses"]
+  },
+  {
+    text: "Tomber dans les pommes",
+    origine: "Expression de George Sand pour s'évanouir",
+    explication: "S'évanouir",
+    fake_origine: ["Cueillir des fruits", "Être surpris", "Rencontrer quelqu'un"],
+    fake_explication: ["Rester éveillé", "Être joyeux", "Applaudir"]
+  },
+  {
+    text: "Prendre la mouche",
+    origine: "Référence aux mouches perturbant les animaux",
+    explication: "Se vexer pour peu de chose",
+    fake_origine: ["Une tradition du sud de la France", "Célébration de la patience", "Chasser les insectes"],
+    fake_explication: ["Être heureux", "Devenir bruyant", "Rire soudainement"]
+  },
+  {
+    text: "Passer l'arme à gauche",
+    origine: "Origine militaire pour mourir",
+    explication: "Mourir",
+    fake_origine: ["Échanger des armes", "S'entraîner au tir", "Défendre sa famille"],
+    fake_explication: ["Survivre à un accident", "Changer de travail", "Réussir une épreuve"]
+  },
+  {
+    text: "Mettre la charrue avant les bœufs",
+    origine: "Référence à l'ordre de labour",
+    explication: "Faire les choses dans le désordre",
+    fake_origine: ["Expression de soldats", "Proverbe marin", "Tradition de chasse"],
+    fake_explication: ["Tout organiser", "Avancer vite", "Aller à l'envers"]
+  },
+  {
+    text: "Appuyer sur le champignon",
+    origine: "Ancienne expression pour accélérer",
+    explication: "Accélérer",
+    fake_origine: ["Champignons rituels", "Chasse aux champignons", "Manger vite"],
+    fake_explication: ["Ralentir", "S'endormir", "Arrêter soudainement"]
+  },
+  {
+    text: "Avoir le cafard",
+    origine: "Sentiment de tristesse lié à l'insecte",
+    explication: "Être déprimé",
+    fake_origine: ["Expression marinière", "Fête du printemps", "Chant des oiseaux"],
+    fake_explication: ["Être joyeux", "Danser en public", "Rire bruyamment"]
+  },
+  {
+    text: "Être haut comme trois pommes",
+    origine: "Expression comparant la taille",
+    explication: "Être petit",
+    fake_origine: ["Proverbe culinaire", "Expression liée aux enfants", "Fête agricole"],
+    fake_explication: ["Être grand", "Être bavard", "Être malin"]
+  },
+  {
+    text: "Couper les cheveux en quatre",
+    origine: "Faire preuve d'extrême précision",
+    explication: "Être trop pointilleux",
+    fake_origine: ["Expression d’artisans", "Tradition de coiffeurs", "Expression militaire"],
+    fake_explication: ["Être courageux", "Prendre des risques", "Être rapide"]
+  },
+  {
+    text: "Faire d'une pierre deux coups",
+    origine: "Chasse où l'on tue deux oiseaux",
+    explication: "Atteindre deux objectifs avec une action",
+    fake_origine: ["Ancienne expression guerrière", "Proverbe de pêcheurs", "Jeu d'enfants"],
+    fake_explication: ["Échouer deux fois", "Avoir deux opinions", "Viser trop large"]
+  },
+  {
+    text: "Avoir un poil dans la main",
+    origine: "Expression pour désigner un paresseux",
+    explication: "Être paresseux",
+    fake_origine: ["Expression militaire", "Dicton de couturiers", "Proverbe de marins"],
+    fake_explication: ["Être très occupé", "Travailler sans cesse", "Aimer les défis"]
+  },
+  {
+    text: "Reprendre du poil de la bête",
+    origine: "Expression médiévale sur la guérison",
+    explication: "Retrouver de l'énergie",
+    fake_origine: ["Expression des bouchers", "Rituel des médecins", "Croyance des alchimistes"],
+    fake_explication: ["Être malade", "S'ennuyer", "Faire un combat"]
+  },
+  {
+    text: "Mettre les pieds dans le plat",
+    origine: "Réaliser un acte embarrassant",
+    explication: "Aborder un sujet délicat",
+    fake_origine: ["Proverbe paysan", "Expression des pêcheurs", "Rituel culinaire"],
+    fake_explication: ["Éviter une discussion", "Être diplomate", "Changer de sujet"]
+  }
+];
+
+
+
+    let currentExpression;
+    let mode = '';  // origine ou explication
+    let usedExpressions = new Set();
+
+    // Fonction pour sélectionner le mode
+    function selectMode(selectedMode) {
+      mode = selectedMode;
+      document.getElementById('title').textContent = mode === 'origine'
+        ? "Quelle est l'origine de l'expression ?"
+        : "Quelle est l'explication de l'expression ?";
+      loadExpression();
+    }
+
+    // Fonction pour charger une nouvelle expression
+    function loadExpression() {
+      let remainingExpressions = expressions.filter((_, i) => !usedExpressions.has(i));
+      if (remainingExpressions.length === 0) {
+        alert("Vous avez vu toutes les expressions ! Redémarrez pour réessayer.");
+        return;
+      }
+
+      const index = Math.floor(Math.random() * remainingExpressions.length);
+      currentExpression = remainingExpressions[index];
+      usedExpressions.add(expressions.indexOf(currentExpression));
+      
+      document.getElementById('expression').textContent = currentExpression.text;
+
+      const correctAnswer = mode === 'origine' ? currentExpression.origine : currentExpression.explication;
+      const fakeAnswers = mode === 'origine' ? currentExpression.fake_origine : currentExpression.fake_explication;
+
+      const options = [correctAnswer, ...fakeAnswers].sort(() => Math.random() - 0.5);
+      options.forEach((option, i) => {
+        const btn = document.getElementById(`answer${i}`);
+        btn.textContent = option;
+        btn.classList.remove('correct', 'wrong');
+      });
+    }
+
+    // Fonction pour vérifier la réponse
+    function checkAnswer(index) {
+      const answerText = document.getElementById(`answer${index}`).textContent;
+      const correctAnswer = mode === 'origine' ? currentExpression.origine : currentExpression.explication;
+      const isCorrect = answerText === correctAnswer;
+
+      if (isCorrect) {
+        document.getElementById(`answer${index}`).classList.add('correct');
+        document.getElementById('title').textContent = "Gagné !";
+      } else {
+        document.getElementById(`answer${index}`).classList.add('wrong');
+        document.getElementById('title').textContent = `Perdu ! La bonne réponse était : "${correctAnswer}"`;
+      }
+
+      setTimeout(() => {
+        document.getElementById('title').textContent = mode === 'origine'
+          ? "Quelle est l'origine de l'expression ?"
+          : "Quelle est l'explication de l'expression ?";
+        loadExpression();
+      }, 2000);
+    }
+  </script>
+
+</body>
+</html>
